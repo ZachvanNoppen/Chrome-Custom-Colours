@@ -9,6 +9,16 @@
   <body>
     <canvas id="canvas"></canvas>
     <div id="display"></div>
+    <div class="slidecontainer">
+      <input type="range" min="0" max="255" value="0" class="slider" id="rRange">
+      <p>Red: <span id="redVal"></span></p>
+      <input type="range" min="0" max="255" value="0" class="slider" id="gRange">
+      <p>Green: <span id="greenVal"></span></p>
+      <input type="range" min="0" max="255" value="0" class="slider" id="bRange">
+      <p>Blue: <span id="blueVal"></span></p>
+      <input type="range" min="0" max="100" value="99" class="slider" id="aRange">
+      <p>Alpha: <span id="alphaVal"></span></p>
+    </div>
   </body>
   <script type="text/javascript" src="wheel.js">
   </script>

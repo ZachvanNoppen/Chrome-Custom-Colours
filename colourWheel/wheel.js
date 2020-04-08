@@ -1,3 +1,9 @@
+/*
+Code Modified by Zachary van Noppen
+from the blog post by Cory Forsyth found here:
+https://medium.com/@bantic/hand-coding-a-color-wheel-with-canvas-78256c9d7d43
+
+*/
 let circle = {
   RADIUS: 70,
   DRAG: false,
@@ -9,9 +15,21 @@ let circle = {
     r:0,
     g:0,
     b:0,
-    a:100,
+    a:1,
   },
-  init: function(){
+  ENABLE_SLIDERS: null, ///Disabled Sliders
+  SLIDER_ID: {
+    r: "rRange",
+    rLabel: "redVal",
+    g:"gRange",
+    gLabel: "greenVal",
+    b:"bRange",
+    bLabel: "blueVal",
+    a:"aRange",
+    aLabel: "alphaVal"
+  },
+  init: function(sliders= false){
+    this.ENABLE_SLIDERS = sliders;
     let canvas = document.getElementById('canvas');
     this.setupCanvas(canvas);
     let ctx = canvas.getContext("2d");
@@ -26,8 +44,8 @@ let circle = {
   },
   // All event handlers
   events: function(ctx){
-
     let self = this;
+    //Canvas Events
     canvas.addEventListener("mousedown", function(e)
     {
         self.DRAG = true;
@@ -43,6 +61,27 @@ let circle = {
     {
         self.DRAG = false;
     });
+
+    //Slider events
+    if(self.ENABLE_SLIDERS){
+      document.getElementById(this.SLIDER_ID.r).oninput = function(){
+        self.CUR_COLOUR.r = this.value;
+        self.setColour();
+      }
+      document.getElementById(this.SLIDER_ID.g).oninput = function(){
+        self.CUR_COLOUR.g = this.value;
+        self.setColour();
+      }
+      document.getElementById(this.SLIDER_ID.b).oninput = function(){
+        self.CUR_COLOUR.b = this.value;
+        self.setColour();
+      }
+      document.getElementById(this.SLIDER_ID.a).oninput = function(){
+        self.CUR_COLOUR.a = this.value/100;
+        self.setColour();
+      }
+    }
+
   },
   drawCircle: function(ctx, canvas, testX,testY){
     let image = ctx.createImageData(2*this.RADIUS, 2*this.RADIUS);
@@ -86,7 +125,7 @@ let circle = {
             this.CUR_COLOUR.r = red;
             this.CUR_COLOUR.g = green;
             this.CUR_COLOUR.b = blue;
-            this.CUR_COLOUR.a = alpha;
+            this.CUR_COLOUR.a = alpha/255;
         }
       }
     }
@@ -99,6 +138,18 @@ let circle = {
       document.getElementById("display").style.background = "rgba("+this.CUR_COLOUR.r+","+this.CUR_COLOUR.g+","+this.CUR_COLOUR.b+","+this.CUR_COLOUR.a+")";
       //Debugging
       //console.log("rgba("+this.CUR_COLOUR.r+","+this.CUR_COLOUR.g+","+this.CUR_COLOUR.b+","+this.CUR_COLOUR.a+")");
+
+      if(this.ENABLE_SLIDERS){
+        //update Slider information
+        document.getElementById(this.SLIDER_ID.r).value = this.CUR_COLOUR.r;
+        document.getElementById(this.SLIDER_ID.g).value = this.CUR_COLOUR.g;
+        document.getElementById(this.SLIDER_ID.b).value = this.CUR_COLOUR.b;
+        document.getElementById(this.SLIDER_ID.a).value = this.CUR_COLOUR.a*100;
+        document.getElementById(this.SLIDER_ID.rLabel).innerHTML = Math.round(this.CUR_COLOUR.r);
+        document.getElementById(this.SLIDER_ID.gLabel).innerHTML = Math.round(this.CUR_COLOUR.g);
+        document.getElementById(this.SLIDER_ID.bLabel).innerHTML = Math.round(this.CUR_COLOUR.b);
+        document.getElementById(this.SLIDER_ID.aLabel).innerHTML = Math.round((this.CUR_COLOUR.a*100));
+      }
     }else{
       //the colour is specified
       document.getElementById("display").style.background = "rgba("+colour.r+","+colour.g+","+colour.b+","+colour.a+")";
@@ -168,6 +219,6 @@ let circle = {
 
 
 //init
-circle.init();
+circle.init(true);
 //loop
 //This is just a very simple game loop
