@@ -6,11 +6,15 @@
   "content_scripts": [
     {
       "matches": [
-        "file:///D:/GitHub%20Projects/Chrome%20Custom%20Colours/scripts/tagfinding.html"
+        "file:///E:/Projects/CCC/Chrome-Custom-Colours/demo.html"
       ],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "css":["styles/content.css"]
     }
   ],
+  "page_action": {
+    "default_popup": "popup.html"
+  },
   "browser_action": {
     "default_icon": "icon.png"
   },

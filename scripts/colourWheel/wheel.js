@@ -3,13 +3,16 @@ Code Modified by Zachary van Noppen
 from the blog post by Cory Forsyth found here:
 https://medium.com/@bantic/hand-coding-a-color-wheel-with-canvas-78256c9d7d43
 
+TODO:
+Store the array of colours so it doesn't have to recreate the circle every time, only redraw it
 */
 let circle = {
-  RADIUS: 70,
+  RADIUS: null, //default 70
+  MARKER_SIZE: 5,
   DRAG: false,
   DIMENSIONS: {
-    width: "auto", //"100px"
-    height: "auto"
+    width: null, //will be set to 2*RADIUS by default
+    height: null
   },
   CUR_COLOUR:{
     r:0,
@@ -17,7 +20,7 @@ let circle = {
     b:0,
     a:1,
   },
-  ENABLE_SLIDERS: null, ///Disabled Sliders
+  ENABLE_SLIDERS: null, ///Disabled Sliders by default
   SLIDER_ID: {
     r: "rRange",
     rLabel: "redVal",
@@ -28,9 +31,11 @@ let circle = {
     a:"aRange",
     aLabel: "alphaVal"
   },
-  init: function(sliders= false){
+  init: function(radius, sliders= false){
+    this.RADIUS = radius;
     this.ENABLE_SLIDERS = sliders;
     let canvas = document.getElementById('canvas');
+    this.setDimensions();
     this.setupCanvas(canvas);
     let ctx = canvas.getContext("2d");
     //Drawing circle on screen
@@ -38,27 +43,29 @@ let circle = {
     //Setting up even handlers
     this.events(ctx);
   },
+  //By default the canvas fits the circle perfectly
+  setDimensions: function(x = this.RADIUS*2, y = this.RADIUS*2){
+    this.DIMENSIONS.width = x;
+    this.DIMENSIONS.height = y;
+  },
   setupCanvas: function(canvas){
-    canvas.style.width = this.DIMENSIONS.width;
-    canvas.style.height = this.DIMENSIONS.height;
+    canvas.width = this.DIMENSIONS.width;
+    canvas.height = this.DIMENSIONS.height;
   },
   // All event handlers
   events: function(ctx){
     let self = this;
     //Canvas Events
-    canvas.addEventListener("mousedown", function(e)
-    {
+    canvas.addEventListener("mousedown", function(e){
         self.DRAG = true;
     });
-    canvas.addEventListener("mousemove", function(e)
-    {
+    canvas.addEventListener("mousemove", function(e){
       if(self.DRAG){
         self.getMousePosition(canvas, ctx, e);
         self.setColour();
       }
     });
-    canvas.addEventListener("mouseup", function(e)
-    {
+    canvas.addEventListener("mouseup", function(e){
         self.DRAG = false;
     });
 
@@ -83,7 +90,7 @@ let circle = {
     }
 
   },
-  drawCircle: function(ctx, canvas, testX,testY){
+  drawCircle: function(ctx, canvas, posX, posY){
     let image = ctx.createImageData(2*this.RADIUS, 2*this.RADIUS);
     let data = image.data;
     let offsetX = (canvas.width - this.RADIUS*2) / 2;
@@ -121,7 +128,7 @@ let circle = {
         data[index+3] = alpha;
 
         //Setting the current colour
-        if(testX == adjustedX+offsetX && testY == adjustedY+offsetY){
+        if(posX == adjustedX+offsetX && posY == adjustedY+offsetY){
             this.CUR_COLOUR.r = red;
             this.CUR_COLOUR.g = green;
             this.CUR_COLOUR.b = blue;
@@ -172,20 +179,31 @@ let circle = {
 
   getMousePosition: function(canvas, ctx, event){
     let rect = canvas.getBoundingClientRect();
+    //Get mouse position
     let x = event.clientX - rect.left;
     let y = event.clientY - rect.top;
 
-    ctx.clearRect(0,0,canvas.width, canvas.height);
-    this.drawCircle(ctx, canvas,x,y);
+    //Draw a marker at the location of the mouse
+    this.drawMarker(canvas,x,y,this.MARKER_SIZE);
 
-    ctx.beginPath();
-    ctx.arc(x, y, 2, 0, 2 * Math.PI);
-    ctx.stroke();
-
-    //for debugging
     return [x,y];
   },
-
+  drawMarker: function(canvas,x,y,size = 2){
+    let ctx = canvas.getContext('2d');
+    //Check if the marker is in the bounds of the circle
+    let center = [canvas.width / 2, canvas.height / 2];
+    //distance in a line from the center of the wheel
+    let distance = Math.sqrt(((x-center[0])*(x-center[0]))+((y-center[1])*(y-center[1])));
+    if(distance < this.RADIUS){
+      //Clear any old information on it and remake the gradient
+      ctx.clearRect(0,0,canvas.width, canvas.height);
+      this.drawCircle(ctx, canvas,x,y);
+      //Draw the marker
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, 2 * Math.PI);
+      ctx.stroke();
+    }
+  },
   // hue in range [0, 360]
   // saturation, value in range [0,1]
   // return [r,g,b] each in range [0,255]
@@ -217,8 +235,5 @@ let circle = {
   }
 }
 
-
 //init
-circle.init(true);
-//loop
-//This is just a very simple game loop
+circle.init(100,false);
