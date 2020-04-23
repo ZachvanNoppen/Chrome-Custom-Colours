@@ -4,13 +4,19 @@ let pallete = {
     console.log("initialising the coulours");
     //setting the colours from memory
   },
+  COLOURS: {
+    primary: "grey",
+    secondary: "orange",
+    tertiary: "white",
+    selection_1: "red",
+  },
   setPalleteColours: function(){
     let URL = window.location.href;
     chrome.storage.sync.get([URL], function(result) {
           console.log('Value is:');
           console.log(result);
+          let x = result;
         });
-
   },
   savePalleteColours: function(){
     //Saving all the current data to the local storage
@@ -30,13 +36,7 @@ let pallete = {
         });
   },
   printColours: function(){
-    console.log(COLOURS);
-  },
-  COLOURS: {
-    primary: "grey",
-    secondary: "orange",
-    tertiary: "white",
-    selection_1: "red",
+    console.log(this.COLOURS);
   },
   getPrimary: function(){
     let body = document.getElementsByTagName("body");
@@ -163,7 +163,7 @@ function printAllData(file){
 }
 //
 //
-interface.init();
+//interface.init();
 renderPage(interface, pallete);
 
 printAllData();
