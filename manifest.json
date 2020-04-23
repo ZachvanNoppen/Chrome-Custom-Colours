@@ -5,7 +5,7 @@
   "manifest_version": 2,
   "permissions": ["storage"],
   "background":{
-    "scripts": ["scripts/loadPreferences.js"],
+    "scripts": ["scripts/background.js"],
     "persistant": false
   },
   "content_scripts": [

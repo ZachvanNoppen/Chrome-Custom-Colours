@@ -10,6 +10,18 @@ let pallete = {
     tertiary: "white",
     selection_1: "red",
   },
+  setColour: function(newColours) {
+    if(newColours.type == "primary"){
+      this.COLOURS.primary = "rgba("+newColours.colour.r+", "+newColours.colour.g+", "+newColours.colour.b+"0, "+newColours.colour.a+");"
+    }else if(newColours.type == "secondary"){
+      this.COLOURS.secondary = "rgba("+newColours.colour.r+", "+newColours.colour.g+", "+newColours.colour.b+"0, "+newColours.colour.a+");"
+    }else if(newColours.type == "tertiary"){
+      this.COLOURS.tertiary = "rgba("+newColours.colour.r+", "+newColours.colour.g+", "+newColours.colour.b+"0, "+newColours.colour.a+");"
+    }else{
+
+    }
+
+  },
   setPalleteColours: function(){
     let URL = window.location.href;
     chrome.storage.sync.get([URL], function(result) {
@@ -148,7 +160,7 @@ let interface = {
 
 //THese are temporary functions
 
-function renderPage(interface, pallete) {
+function renderPage(pallete) {
   pallete.updateColours(pallete.getPrimary(), pallete.COLOURS.primary);
   pallete.updateColours(pallete.getSecondary(), pallete.COLOURS.secondary);
   pallete.updateColours(pallete.getTertiary(), pallete.COLOURS.tertiary);
@@ -164,10 +176,20 @@ function printAllData(file){
 //
 //
 //interface.init();
-renderPage(interface, pallete);
+renderPage(pallete);
 
 printAllData();
 printAllData();
 
 pallete.savePalleteColours();
 pallete.setPalleteColours();
+
+chrome.runtime.onMessage.addListener(
+  function(data, sender, sendResponse) {
+
+    console.log(data);
+    //Send a message to the content.js file, if not successful send errchrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    sendResponse({msg: "DONE", err: null});
+    pallete.setColour(data);
+    renderPage(pallete);
+});

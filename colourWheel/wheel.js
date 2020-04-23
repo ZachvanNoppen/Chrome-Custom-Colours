@@ -6,8 +6,9 @@ https://medium.com/@bantic/hand-coding-a-color-wheel-with-canvas-78256c9d7d43
 TODO:
 Store the array of colours so it doesn't have to recreate the circle every time, only redraw it
 */
-function Circle(sliders = false,rad = 70, labels = {r: "rRange",rLabel: "redVal",g:"gRange",gLabel: "greenVal",b:"bRange",bLabel: "blueVal",a:"aRange",aLabel: "alphaVal",display: "display",canvas: "canvas"}){
+function Circle(sliders = false,rad = 70, labels = {r: "rRange",rLabel: "redVal",g:"gRange",gLabel: "greenVal",b:"bRange",bLabel: "blueVal",a:"aRange",aLabel: "alphaVal",display: "display",canvas: "canvas"}, type = "primary"){
   this.RADIUS= rad; //default 70
+  this.TYPE = type;
   this.MARKER_SIZE= 5;
   this.DRAG= false;
   this.DIMENSIONS= {
@@ -40,6 +41,14 @@ function Circle(sliders = false,rad = 70, labels = {r: "rRange",rLabel: "redVal"
     canvas.width = this.DIMENSIONS.width;
     canvas.height = this.DIMENSIONS.height;
   };
+  this.updatePageColours = function(){
+    //Note that this is the only function that is specific to the project. Remove it and it's references to make this colour wheel a generic template
+    chrome.runtime.sendMessage({colour: this.CUR_COLOUR, type: this.TYPE}, function() {
+      console.log("Data sent...");
+      //The connection will close due to chained messages, so not data is sent back
+    });
+
+  };
   // All event handlers
   this.events= function(ctx){
     let self = this;
@@ -62,18 +71,22 @@ function Circle(sliders = false,rad = 70, labels = {r: "rRange",rLabel: "redVal"
       document.getElementById(this.SLIDER_ID.r).oninput = function(){
         self.CUR_COLOUR.r = this.value;
         self.setColour();
+        self.updatePageColours();
       }
       document.getElementById(this.SLIDER_ID.g).oninput = function(){
         self.CUR_COLOUR.g = this.value;
         self.setColour();
+        self.updatePageColours();
       }
       document.getElementById(this.SLIDER_ID.b).oninput = function(){
         self.CUR_COLOUR.b = this.value;
         self.setColour();
+        self.updatePageColours();
       }
       document.getElementById(this.SLIDER_ID.a).oninput = function(){
         self.CUR_COLOUR.a = this.value/100;
         self.setColour();
+        self.updatePageColours();
       }
     }
 
@@ -121,6 +134,7 @@ function Circle(sliders = false,rad = 70, labels = {r: "rRange",rLabel: "redVal"
             this.CUR_COLOUR.g = green;
             this.CUR_COLOUR.b = blue;
             this.CUR_COLOUR.a = alpha/255;
+            this.updatePageColours();
         }
       }
     }
@@ -233,8 +247,8 @@ function Circle(sliders = false,rad = 70, labels = {r: "rRange",rLabel: "redVal"
 }
 
 ///Making three circles
-let circle = new Circle(true,70,{r: "rRange",rLabel: "redVal",g:"gRange",gLabel: "greenVal",b:"bRange",bLabel: "blueVal",a:"aRange",aLabel: "alphaVal",display: "display",canvas: "canvas"});
+let circle = new Circle(true,70,{r: "rRange",rLabel: "redVal",g:"gRange",gLabel: "greenVal",b:"bRange",bLabel: "blueVal",a:"aRange",aLabel: "alphaVal",display: "display",canvas: "canvas"}, "primary");
 
-let circle2 = new Circle(true,70,{r: "rRange2",rLabel: "redVal2",g:"gRange2",gLabel: "greenVal2",b:"bRange2",bLabel: "blueVal2",a:"aRange2",aLabel: "alphaVal2",display: "display2",canvas: "canvas2"});
+let circle2 = new Circle(true,70,{r: "rRange2",rLabel: "redVal2",g:"gRange2",gLabel: "greenVal2",b:"bRange2",bLabel: "blueVal2",a:"aRange2",aLabel: "alphaVal2",display: "display2",canvas: "canvas2"}, "secondary");
 
-let circle3 = new Circle(true,70,{r: "rRange3",rLabel: "redVal3",g:"gRange3",gLabel: "greenVal3",b:"bRange3",bLabel: "blueVal3",a:"aRange3",aLabel: "alphaVal3",display: "display3",canvas: "canvas3"});
+let circle3 = new Circle(true,70,{r: "rRange3",rLabel: "redVal3",g:"gRange3",gLabel: "greenVal3",b:"bRange3",bLabel: "blueVal3",a:"aRange3",aLabel: "alphaVal3",display: "display3",canvas: "canvas3"}, "tertiary");
