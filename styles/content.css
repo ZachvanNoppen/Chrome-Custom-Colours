@@ -1,0 +1,27 @@
+.menuContent{
+  display: none;
+  position: fixed;
+  background-color: #FFFFFF;
+  top:0;
+  width:100%;
+  height:auto;
+}
+
+.menu{
+  position: fixed;
+  right: 20px;
+  top: 0px;
+  height:30px;
+  width: 30px;;
+}
+
+/* TEMP */
+.active{
+  margin-top: 130px;
+}
+
+/* UI styles
+
+These are not changed by the app
+*/
+.interface{}
