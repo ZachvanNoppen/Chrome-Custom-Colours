@@ -3,6 +3,11 @@
   "description": "Extension to change the styles of webpages",
   "version": "0.8",
   "manifest_version": 2,
+  "permissions": ["storage"],
+  "background":{
+    "scripts": ["scripts/loadPreferences.js"],
+    "persistant": false
+  },
   "content_scripts": [
     {
       "matches": [
@@ -13,10 +18,8 @@
     }
   ],
   "page_action": {
-    "default_popup": "popup.html"
-  },
-  "browser_action": {
+    "default_popup": "popup.html",
     "default_icon": "icon.png"
   },
-  "web_accessible_resources": ["assets/*.svg"]
+  "web_accessible_resources": ["assets/*.svg", "data/*.json"]
 }

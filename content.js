@@ -1,6 +1,36 @@
+
 let pallete = {
   init: function(){
-    console.log("initializzing the coulours");
+    console.log("initialising the coulours");
+    //setting the colours from memory
+  },
+  setPalleteColours: function(){
+    let URL = window.location.href;
+    chrome.storage.sync.get([URL], function(result) {
+          console.log('Value is:');
+          console.log(result);
+        });
+
+  },
+  savePalleteColours: function(){
+    //Saving all the current data to the local storage
+    let URL = window.location.href;
+    console.log(URL);
+    let preferences = {
+      url: URL,
+      colours: this.COLOURS,
+      //Optional for later
+      ///primaryItems: {},
+      ///secondaryItems: {},
+      //tertiaryItems: {},
+    };
+    //Generate a unique key for URL later
+    chrome.storage.sync.set({[URL]: preferences}, function() {
+          console.log("saved");
+        });
+  },
+  printColours: function(){
+    console.log(COLOURS);
   },
   COLOURS: {
     primary: "grey",
@@ -124,7 +154,20 @@ function renderPage(interface, pallete) {
   pallete.updateColours(pallete.getTertiary(), pallete.COLOURS.tertiary);
 }
 
+function printAllData(file){
+  chrome.storage.sync.get(null, function(result) {
+    console.log('All data: ');
+    console.log(result);
+    });
+
+}
 //
 //
 interface.init();
 renderPage(interface, pallete);
+
+printAllData();
+printAllData();
+
+pallete.savePalleteColours();
+pallete.setPalleteColours();
