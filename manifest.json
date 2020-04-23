@@ -3,17 +3,23 @@
   "description": "Extension to change the styles of webpages",
   "version": "0.8",
   "manifest_version": 2,
+  "permissions": ["storage"],
+  "background":{
+    "scripts": ["scripts/loadPreferences.js"],
+    "persistant": false
+  },
   "content_scripts": [
     {
       "matches": [
-        "file:///D:/GitHub%20Projects/Chrome%20Custom%20Colours/scripts/tagfinding.html"
+        "file:///E:/Projects/CCC/Chrome-Custom-Colours/demo.html"
       ],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "css":["styles/content.css"]
     }
   ],
   "browser_action": {
     "default_icon": "icon.png",
     "default_popup": "colourWheel/index.html"
   },
-  "web_accessible_resources": ["assets/*.svg"]
+  "web_accessible_resources": ["assets/*.svg", "data/*.json"]
 }
