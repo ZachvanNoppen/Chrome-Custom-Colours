@@ -3,62 +3,66 @@ Code Modified by Zachary van Noppen
 from the blog post by Cory Forsyth found here:
 https://medium.com/@bantic/hand-coding-a-color-wheel-with-canvas-78256c9d7d43
 
+TODO:
+Store the array of colours so it doesn't have to recreate the circle every time, only redraw it
 */
-let circle = {
-  RADIUS: 70,
-  DRAG: false,
-  DIMENSIONS: {
-    width: "auto", //"100px"
-    height: "auto"
-  },
-  CUR_COLOUR:{
+function Circle(sliders = false,rad = 70, labels = {r: "rRange",rLabel: "redVal",g:"gRange",gLabel: "greenVal",b:"bRange",bLabel: "blueVal",a:"aRange",aLabel: "alphaVal",display: "display",canvas: "canvas"}, type = "primary"){
+  this.RADIUS= rad; //default 70
+  this.TYPE = type;
+  this.MARKER_SIZE= 5;
+  this.DRAG= false;
+  this.DIMENSIONS= {
+    width: null, //will be set to 2*RADIUS by default
+    height: null
+  };
+  this.CUR_COLOUR={
     r:0,
     g:0,
     b:0,
     a:1,
-  },
-  ENABLE_SLIDERS: null, ///Disabled Sliders
-  SLIDER_ID: {
-    r: "rRange",
-    rLabel: "redVal",
-    g:"gRange",
-    gLabel: "greenVal",
-    b:"bRange",
-    bLabel: "blueVal",
-    a:"aRange",
-    aLabel: "alphaVal"
-  },
-  init: function(sliders= false){
-    this.ENABLE_SLIDERS = sliders;
-    let canvas = document.getElementById('canvas');
-    this.setupCanvas(canvas);
-    let ctx = canvas.getContext("2d");
-    //Drawing circle on screen
-    this.drawCircle(ctx, canvas,0,0);
-    //Setting up even handlers
-    this.events(ctx);
-  },
-  setupCanvas: function(canvas){
-    canvas.style.width = this.DIMENSIONS.width;
-    canvas.style.height = this.DIMENSIONS.height;
-  },
+  };
+  this.ENABLE_SLIDERS= sliders, ///Disabled Sliders by default
+  this.SLIDER_ID = {
+    r: labels.r,
+    rLabel: labels.rLabel,
+    g:labels.g,
+    gLabel: labels.gLabel,
+    b:labels.b,
+    bLabel: labels.bLabel,
+    a:labels.a,
+    aLabel: labels.aLabel
+  };
+  //By default the canvas fits the circle perfectly
+  this.setDimensions= function(x = this.RADIUS*2, y = this.RADIUS*2){
+    this.DIMENSIONS.width = x;
+    this.DIMENSIONS.height = y;
+  };
+  this.setupCanvas= function(canvas){
+    canvas.width = this.DIMENSIONS.width;
+    canvas.height = this.DIMENSIONS.height;
+  };
+  this.updatePageColours = function(){
+    //Note that this is the only function that is specific to the project. Remove it and it's references to make this colour wheel a generic template
+    chrome.runtime.sendMessage({colour: this.CUR_COLOUR, type: this.TYPE}, function() {
+      console.log("Data sent...");
+      //The connection will close due to chained messages, so not data is sent back
+    });
+
+  };
   // All event handlers
-  events: function(ctx){
+  this.events= function(ctx){
     let self = this;
     //Canvas Events
-    canvas.addEventListener("mousedown", function(e)
-    {
+    canvas.addEventListener("mousedown", function(e){
         self.DRAG = true;
     });
-    canvas.addEventListener("mousemove", function(e)
-    {
+    canvas.addEventListener("mousemove", function(e){
       if(self.DRAG){
         self.getMousePosition(canvas, ctx, e);
         self.setColour();
       }
     });
-    canvas.addEventListener("mouseup", function(e)
-    {
+    canvas.addEventListener("mouseup", function(e){
         self.DRAG = false;
     });
 
@@ -67,23 +71,27 @@ let circle = {
       document.getElementById(this.SLIDER_ID.r).oninput = function(){
         self.CUR_COLOUR.r = this.value;
         self.setColour();
+        self.updatePageColours();
       }
       document.getElementById(this.SLIDER_ID.g).oninput = function(){
         self.CUR_COLOUR.g = this.value;
         self.setColour();
+        self.updatePageColours();
       }
       document.getElementById(this.SLIDER_ID.b).oninput = function(){
         self.CUR_COLOUR.b = this.value;
         self.setColour();
+        self.updatePageColours();
       }
       document.getElementById(this.SLIDER_ID.a).oninput = function(){
         self.CUR_COLOUR.a = this.value/100;
         self.setColour();
+        self.updatePageColours();
       }
     }
 
-  },
-  drawCircle: function(ctx, canvas, testX,testY){
+  };
+  this.drawCircle= function(ctx, canvas, posX, posY){
     let image = ctx.createImageData(2*this.RADIUS, 2*this.RADIUS);
     let data = image.data;
     let offsetX = (canvas.width - this.RADIUS*2) / 2;
@@ -121,21 +129,22 @@ let circle = {
         data[index+3] = alpha;
 
         //Setting the current colour
-        if(testX == adjustedX+offsetX && testY == adjustedY+offsetY){
+        if(posX == adjustedX+offsetX && posY == adjustedY+offsetY){
             this.CUR_COLOUR.r = red;
             this.CUR_COLOUR.g = green;
             this.CUR_COLOUR.b = blue;
             this.CUR_COLOUR.a = alpha/255;
+            this.updatePageColours();
         }
       }
     }
     ctx.putImageData(image, offsetX, offsetY);
-  },
-  setColour: function(colour = null){
+  };
+  this.setColour= function(colour = null){
     //If colour is not null it expects an object in the format {r,g,b,a}
     if(colour == null){
       //if no colour is specified, use the one in the colour picker
-      document.getElementById("display").style.background = "rgba("+this.CUR_COLOUR.r+","+this.CUR_COLOUR.g+","+this.CUR_COLOUR.b+","+this.CUR_COLOUR.a+")";
+      document.getElementById(labels.display).style.background = "rgba("+this.CUR_COLOUR.r+","+this.CUR_COLOUR.g+","+this.CUR_COLOUR.b+","+this.CUR_COLOUR.a+")";
       //Debugging
       //console.log("rgba("+this.CUR_COLOUR.r+","+this.CUR_COLOUR.g+","+this.CUR_COLOUR.b+","+this.CUR_COLOUR.a+")");
 
@@ -152,45 +161,56 @@ let circle = {
       }
     }else{
       //the colour is specified
-      document.getElementById("display").style.background = "rgba("+colour.r+","+colour.g+","+colour.b+","+colour.a+")";
+      document.getElementById(labels.display).style.background = "rgba("+colour.r+","+colour.g+","+colour.b+","+colour.a+")";
 
     }
 
 
-  },
-  xy2polar: function(x,y){
+  };
+  this.xy2polar= function(x,y){
     let r = Math.sqrt(x*x + y*y);
     let phi = Math.atan2(y, x);
     return [r, phi];
-  },
+  };
 
   // rad in [-π, π] range
   // return degree in [0, 360] range
-  rad2deg: function(rad){
+  this.rad2deg= function(rad){
     return ((rad + Math.PI) / (2 * Math.PI)) * 360;
-  },
+  };
 
-  getMousePosition: function(canvas, ctx, event){
+  this.getMousePosition= function(canvas, ctx, event){
     let rect = canvas.getBoundingClientRect();
+    //Get mouse position
     let x = event.clientX - rect.left;
     let y = event.clientY - rect.top;
 
-    ctx.clearRect(0,0,canvas.width, canvas.height);
-    this.drawCircle(ctx, canvas,x,y);
+    //Draw a marker at the location of the mouse
+    this.drawMarker(canvas,x,y,this.MARKER_SIZE);
 
-    ctx.beginPath();
-    ctx.arc(x, y, 2, 0, 2 * Math.PI);
-    ctx.stroke();
-
-    //for debugging
     return [x,y];
-  },
-
+  };
+  this.drawMarker= function(canvas,x,y,size = 2){
+    let ctx = canvas.getContext('2d');
+    //Check if the marker is in the bounds of the circle
+    let center = [canvas.width / 2, canvas.height / 2];
+    //distance in a line from the center of the wheel
+    let distance = Math.sqrt(((x-center[0])*(x-center[0]))+((y-center[1])*(y-center[1])));
+    if(distance < this.RADIUS){
+      //Clear any old information on it and remake the gradient
+      ctx.clearRect(0,0,canvas.width, canvas.height);
+      this.drawCircle(ctx, canvas,x,y);
+      //Draw the marker
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, 2 * Math.PI);
+      ctx.stroke();
+    }
+  };
   // hue in range [0, 360]
   // saturation, value in range [0,1]
   // return [r,g,b] each in range [0,255]
   // See: https://en.wikipedia.org/wiki/HSL_and_HSV#From_HSV
-  hsv2rgb: function(hue, saturation, value){
+  this.hsv2rgb = function(hue, saturation, value){
     let chroma = value * saturation;
     let hue1 = hue / 60;
     let x = chroma * (1- Math.abs((hue1 % 2) - 1));
@@ -214,11 +234,21 @@ let circle = {
 
     // Change r,g,b values from [0,1] to [0,255]
     return [255*r,255*g,255*b];
-  }
+  };
+
+  let canvas = document.getElementById(labels.canvas);
+  this.setDimensions();
+  this.setupCanvas(canvas);
+  let ctx = canvas.getContext("2d");
+  //Drawing circle on screen
+  this.drawCircle(ctx, canvas,0,0);
+  //Setting up even handlers
+  this.events(ctx);
 }
 
+///Making three circles
+let circle = new Circle(true,70,{r: "rRange",rLabel: "redVal",g:"gRange",gLabel: "greenVal",b:"bRange",bLabel: "blueVal",a:"aRange",aLabel: "alphaVal",display: "display",canvas: "canvas"}, "primary");
 
-//init
-circle.init(true);
-//loop
-//This is just a very simple game loop
+let circle2 = new Circle(true,70,{r: "rRange2",rLabel: "redVal2",g:"gRange2",gLabel: "greenVal2",b:"bRange2",bLabel: "blueVal2",a:"aRange2",aLabel: "alphaVal2",display: "display2",canvas: "canvas2"}, "secondary");
+
+let circle3 = new Circle(true,70,{r: "rRange3",rLabel: "redVal3",g:"gRange3",gLabel: "greenVal3",b:"bRange3",bLabel: "blueVal3",a:"aRange3",aLabel: "alphaVal3",display: "display3",canvas: "canvas3"}, "tertiary");
