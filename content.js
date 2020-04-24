@@ -3,6 +3,7 @@ let pallete = {
   init: function(){
     console.log("initialising the coulours");
     //setting the colours from memory
+
   },
   COLOURS: {
     primary: "grey",
@@ -109,6 +110,23 @@ let pallete = {
       }
     });
   },
+  resetColours: function(items, colour){
+    items.forEach(item => {
+      if (item.length != 0) {
+        for (let i = 0; i < item.length; i++) {
+          if (colour == pallete.COLOURS.primary) {
+            if(!item[i].classList.contains("interface") ){
+              item[i].setAttribute("style","background-color: " + colour + " !important");
+            }
+          } else {
+            if(!item[i].classList.contains("interface") ){
+              item[i].setAttribute("style", "color: " + colour + " !important");
+            }
+          }
+        }
+      }
+    });
+  },
 
 };
 
@@ -173,16 +191,18 @@ function printAllData(file){
     });
 
 }
+
+function saveChanges(){
+  pallete.savePalleteColours();
+}
 //
 //
 //interface.init();
-renderPage(pallete);
-
 printAllData();
 printAllData();
 
-pallete.savePalleteColours();
-pallete.setPalleteColours();
+//pallete.savePalleteColours();
+///pallete.setPalleteColours();
 
 chrome.runtime.onMessage.addListener(
   function(data, sender, sendResponse) {

@@ -11,7 +11,7 @@
   "content_scripts": [
     {
       "matches": [
-        "file:///E:/Projects/CCC/Chrome-Custom-Colours/demo.html"
+        "<all_urls>"
       ],
       "js": ["content.js"],
       "css":["styles/content.css"]
