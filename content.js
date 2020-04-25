@@ -1,4 +1,6 @@
 
+//Creating an object to manipulate our page
+
 let pallete = {
   init: function(){
     console.log("initialising the coulours");
@@ -6,10 +8,10 @@ let pallete = {
 
   },
   COLOURS: {
-    primary: "grey",
-    secondary: "orange",
-    tertiary: "white",
-    selection_1: "red",
+    primary: null,
+    secondary: null,
+    tertiary: null,
+    selection_1: null ,
   },
   setColour: function(newColours) {
     if(newColours.type == "primary"){
@@ -24,12 +26,28 @@ let pallete = {
 
   },
   setPalleteColours: function(){
+    let self = this;
     let URL = window.location.href;
     chrome.storage.sync.get([URL], function(result) {
           console.log('Value is:');
           console.log(result);
-          let x = result;
+
+          self.COLOURS = result[URL].colours;
+          console.log(self.COLOURS);
+          console.log("ASDF");
+          if(self.COLOURS.primary != null ){
+            console.log(self.COLOURS.primary);
+            self.updateColours(self.getPrimary(), self.COLOURS.primary);
+          }
+          if(self.COLOURS.secondary != null){
+            self.updateColours(self.getSecondary(), self.COLOURS.secondary);
+          }
+          if(self.COLOURS.tertiary != null){
+            self.updateColours(self.getTertiary(), self.COLOURS.tertiary);
+          }
         });
+
+        renderPage(self);
   },
   savePalleteColours: function(){
     //Saving all the current data to the local storage
@@ -46,6 +64,7 @@ let pallete = {
     //Generate a unique key for URL later
     chrome.storage.sync.set({[URL]: preferences}, function() {
           console.log("saved");
+          console.log(preferences);
         });
   },
   printColours: function(){
@@ -97,8 +116,10 @@ let pallete = {
     items.forEach(item => {
       if (item.length != 0) {
         for (let i = 0; i < item.length; i++) {
-          if (colour == pallete.COLOURS.primary) {
+          console.log("ssss");
+          if (colour == this.COLOURS.primary) {
             if(!item[i].classList.contains("interface") ){
+
               item[i].setAttribute("style","background-color: " + colour + " !important");
             }
           } else {
@@ -110,17 +131,17 @@ let pallete = {
       }
     });
   },
-  resetColours: function(items, colour){
+  resetColours: function(items){
     items.forEach(item => {
       if (item.length != 0) {
         for (let i = 0; i < item.length; i++) {
-          if (colour == pallete.COLOURS.primary) {
+          if (colour == this.COLOURS.primary) {
             if(!item[i].classList.contains("interface") ){
-              item[i].setAttribute("style","background-color: " + colour + " !important");
+              item[i].setAttribute("style","");
             }
           } else {
             if(!item[i].classList.contains("interface") ){
-              item[i].setAttribute("style", "color: " + colour + " !important");
+              item[i].setAttribute("style","");
             }
           }
         }
@@ -130,53 +151,9 @@ let pallete = {
 
 };
 
-let interface = {
-  init: function(){
-    this.displayUI();
-    this.events();
-  },
-  events: function(){
-    //Adding the drop down functionality
-    let coll = document.getElementById("collapse");
-    coll.addEventListener("click", function() {
-      this.classList.toggle("active");
-
-      var content = this.previousElementSibling;
-      if (content.style.display === "block") {
-        content.style.display = "none";
-      } else {
-        content.style.display = "block";
-      }
-    });
-  },
-  setPageStyles: function(){},
-  displayUI: function(){
-    //Getting the location of the assets
-    let assetLocation = chrome.extension.getURL("/assets/");
-    let menu = document.createElement("input");
-    menu.id = "collapse";
-    menu.type = "image";
-    menu.src = assetLocation + "arrow.svg";
-    menu.className = "menu ";
-    menu.className += "interface";
-    ///Menu Section
-    let menuContent = document.createElement("div");
-    menuContent.classList.add('menuContent', 'interface');
-    //Text Content
-    let p = document.createElement("p");
-    p.classList.add('interface');
-    p.style.margin = "0px";
-    p.textContent = "This is where all of the content will go";
-
-    //Adding everything
-    menuContent.appendChild(p);
-    let content = document.getElementsByTagName("body")[0];
-    content.insertBefore(menu, content.firstChild);
-    content.insertBefore(menuContent, menu);
-  }
-};
-
 //THese are temporary functions
+
+pallete.setPalleteColours();
 
 function renderPage(pallete) {
   pallete.updateColours(pallete.getPrimary(), pallete.COLOURS.primary);
@@ -184,7 +161,7 @@ function renderPage(pallete) {
   pallete.updateColours(pallete.getTertiary(), pallete.COLOURS.tertiary);
 }
 
-function printAllData(file){
+function printAllData(){
   chrome.storage.sync.get(null, function(result) {
     console.log('All data: ');
     console.log(result);
@@ -192,24 +169,36 @@ function printAllData(file){
 
 }
 
+
+function resetColours(){
+  pallete.resetColours(pallete.getPrimary());
+  pallete.resetColours(pallete.getSecondary());
+  pallete.resetColours(pallete.getTertiary());
+}
+
+
+//Saving the colours that have been sent
 function saveChanges(){
   pallete.savePalleteColours();
+  console.log("Saved");
+  printAllData();
 }
-//
-//
-//interface.init();
-printAllData();
-printAllData();
 
-//pallete.savePalleteColours();
-///pallete.setPalleteColours();
 
+//Listening for any commands from the UI
 chrome.runtime.onMessage.addListener(
   function(data, sender, sendResponse) {
 
     console.log(data);
     //Send a message to the content.js file, if not successful send errchrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     sendResponse({msg: "DONE", err: null});
-    pallete.setColour(data);
-    renderPage(pallete);
+    if(data.type == "save"){
+      console.log("Here");
+      pallete.savePalleteColours();
+    }else{
+      console.log("d: " + data.type);
+      pallete.setColour(data);
+      renderPage(pallete);
+    }
+
 });
