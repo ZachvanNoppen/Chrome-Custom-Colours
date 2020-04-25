@@ -82,6 +82,10 @@ Ref: https://www.w3schools.com/howto/howto_js_rangeslider.asp
   margin-bottom: 0px;
 }
 
-#Sbtn {
+#saveBtn {
+  margin-bottom: 10px;
+}
+
+#resetBtn {
   margin-bottom: 10px;
 }
