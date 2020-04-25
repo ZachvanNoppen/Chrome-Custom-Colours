@@ -135,15 +135,7 @@ let pallete = {
     items.forEach(item => {
       if (item.length != 0) {
         for (let i = 0; i < item.length; i++) {
-          if (colour == this.COLOURS.primary) {
-            if(!item[i].classList.contains("interface") ){
-              item[i].setAttribute("style","");
-            }
-          } else {
-            if(!item[i].classList.contains("interface") ){
-              item[i].setAttribute("style","");
-            }
-          }
+          item[i].setAttribute("style","");
         }
       }
     });
@@ -189,16 +181,21 @@ function saveChanges(){
 chrome.runtime.onMessage.addListener(
   function(data, sender, sendResponse) {
 
-    console.log(data);
-    //Send a message to the content.js file, if not successful send errchrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    sendResponse({msg: "DONE", err: null});
-    if(data.type == "save"){
-      console.log("Here");
-      pallete.savePalleteColours();
-    }else{
-      console.log("d: " + data.type);
-      pallete.setColour(data);
-      renderPage(pallete);
-    }
+    function(data, sender, sendResponse) {
+
+      console.log(data);
+      //Send a message to the content.js file, if not successful send errchrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      sendResponse({msg: "DONE", err: null});
+      if(data.type == "save"){
+        console.log("Here");
+        pallete.savePalleteColours();
+      }else if(data.type == "reset"){
+        resetColours();
+      }
+      else{
+        console.log("d: " + data.type);
+        pallete.setColour(data);
+        renderPage(pallete);
+      }
 
 });
