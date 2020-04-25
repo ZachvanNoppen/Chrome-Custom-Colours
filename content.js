@@ -181,8 +181,6 @@ function saveChanges(){
 chrome.runtime.onMessage.addListener(
   function(data, sender, sendResponse) {
 
-    function(data, sender, sendResponse) {
-
       console.log(data);
       //Send a message to the content.js file, if not successful send errchrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       sendResponse({msg: "DONE", err: null});
