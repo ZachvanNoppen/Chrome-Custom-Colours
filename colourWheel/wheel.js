@@ -266,3 +266,10 @@ document.getElementById("saveBtn").addEventListener("click",function(){
     //The connection will close due to chained messages, so not data is sent back
   });
 });
+//Triggering when the save button is pressed
+document.getElementById("resetBtn").addEventListener("click",function(){
+  chrome.runtime.sendMessage({type: "reset"}, function() {
+    console.log("Data sent...");
+    //The connection will close due to chained messages, so not data is sent back
+  });
+});

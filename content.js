@@ -135,15 +135,7 @@ let pallete = {
     items.forEach(item => {
       if (item.length != 0) {
         for (let i = 0; i < item.length; i++) {
-          if (colour == this.COLOURS.primary) {
-            if(!item[i].classList.contains("interface") ){
-              item[i].setAttribute("style","");
-            }
-          } else {
-            if(!item[i].classList.contains("interface") ){
-              item[i].setAttribute("style","");
-            }
-          }
+          item[i].setAttribute("style","");
         }
       }
     });
@@ -195,7 +187,10 @@ chrome.runtime.onMessage.addListener(
     if(data.type == "save"){
       console.log("Here");
       pallete.savePalleteColours();
-    }else{
+    }else if(data.type == "reset"){
+      resetColours();
+    }
+    else{
       console.log("d: " + data.type);
       pallete.setColour(data);
       renderPage(pallete);
