@@ -42,6 +42,8 @@ function Circle(sliders = false,rad = 70, labels = {r: "rRange",rLabel: "redVal"
     canvas.height = this.DIMENSIONS.height;
   };
   this.updatePageColours = function(){
+
+
     //Note that this is the only function that is specific to the project. Remove it and it's references to make this colour wheel a generic template
     chrome.runtime.sendMessage({colour: this.CUR_COLOUR, type: this.TYPE}, function() {
       console.log("Data sent...");
@@ -68,6 +70,9 @@ function Circle(sliders = false,rad = 70, labels = {r: "rRange",rLabel: "redVal"
 
     //Slider events
     if(self.ENABLE_SLIDERS){
+      //Each time the slider is changed, update the colour by sending it to the background.js page,
+      //which relays the message to the main page
+      //The colour is then updated
       document.getElementById(this.SLIDER_ID.r).oninput = function(){
         self.CUR_COLOUR.r = this.value;
         self.setColour();
@@ -252,3 +257,12 @@ let circle = new Circle(true,70,{r: "rRange",rLabel: "redVal",g:"gRange",gLabel:
 let circle2 = new Circle(true,70,{r: "rRange2",rLabel: "redVal2",g:"gRange2",gLabel: "greenVal2",b:"bRange2",bLabel: "blueVal2",a:"aRange2",aLabel: "alphaVal2",display: "display2",canvas: "canvas2"}, "secondary");
 
 let circle3 = new Circle(true,70,{r: "rRange3",rLabel: "redVal3",g:"gRange3",gLabel: "greenVal3",b:"bRange3",bLabel: "blueVal3",a:"aRange3",aLabel: "alphaVal3",display: "display3",canvas: "canvas3"}, "tertiary");
+
+
+//Triggering when the save button is pressed
+document.getElementById("saveBtn").addEventListener("click",function(){
+  chrome.runtime.sendMessage({type: "save"}, function() {
+    console.log("Data sent...");
+    //The connection will close due to chained messages, so not data is sent back
+  });
+});
